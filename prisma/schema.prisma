@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  INDIVIDUAL
+  CHARITY
+  COMPANY
+}
+
+enum PostType {
+  GENERAL
+  HELP_REQUEST
+  BUSINESS_AD
+  EVENT
+}
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  password      String
+  accountType   AccountType
+  
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime?
+  phoneNumber   String?
+  address       String?
+  city          String      @default("Burton Latimer")
+  postcode      String?
+  
+  companyName   String?
+  charityNumber String?
+  bio           String?
+  profileImage  String?
+  coverImage    String?
+  
+  gdprConsent   Boolean     @default(false)
+  marketingConsent Boolean  @default(false)
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  lastLogin     DateTime?
+  
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  sentMessages  Message[]   @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  groupMembers  GroupMember[]
+  followers     Follow[]    @relation("Following")
+  following     Follow[]    @relation("Followers")
+  
+  @@index([email])
+  @@index([accountType])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  content     String
+  postType    PostType  @default(GENERAL)
+  images      String[]
+  
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  comments    Comment[]
+  likes       Like[]
+  
+  groupId     String?
+  group       Group?    @relation(fields: [groupId], references: [id])
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([postType])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([postId])
+  @@index([userId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, postId])
+  @@index([postId])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  content    String
+  read       Boolean  @default(false)
+  
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  isPrivate   Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  members     GroupMember[]
+  posts       Post[]
+  
+  @@index([name])
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  role      String   @default("member")
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  joinedAt  DateTime @default(now())
+  
+  @@unique([userId, groupId])
+  @@index([groupId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  
+  followerId  String
+  follower    User     @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  
+  followingId String
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}

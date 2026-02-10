@@ -1,0 +1,18 @@
+# Burton Latimer Community - Environment Variables Template
+# Copy this file to .env and fill in your actual values
+
+# Database Connection
+# Get this from your Neon.tech dashboard or local PostgreSQL setup
+DATABASE_URL="postgresql://username:password@host/database"
+
+# Authentication Secret
+# Generate a secure random string (use: openssl rand -base64 32)
+NEXTAUTH_SECRET="your-secret-key-change-in-production"
+
+# Application URL
+# Use http://localhost:3000 for development
+# Use your actual domain for production
+NEXTAUTH_URL="http://localhost:3000"
+
+# Node Environment
+NODE_ENV="development"
