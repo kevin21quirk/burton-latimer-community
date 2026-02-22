@@ -88,23 +88,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Integrate with your email service provider (e.g., SendGrid, Mailchimp, AWS SES)
-    // For now, we'll just log it
-    console.log(`Newsletter to be sent to ${subscribers.length} subscribers:`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Content: ${content}`);
-    console.log(`Recipients:`, subscribers.map(s => s.email));
+    // Send emails to all subscribers
+    const recipients = subscribers.map(s => ({
+      email: s.email,
+      name: `${s.firstName} ${s.lastName}`,
+    }));
 
-    // Example integration with a hypothetical email service:
-    // await emailService.sendBulkEmail({
-    //   from: 'newsletter@burtonlatimer.com',
-    //   subject: subject,
-    //   recipients: subscribers.map(s => ({
-    //     email: s.email,
-    //     name: `${s.firstName} ${s.lastName}`,
-    //   })),
-    //   html: htmlContent || content,
-    // });
+    const { sendBulkNewsletterEmails } = await import('@/lib/email');
+    
+    const emailResults = await sendBulkNewsletterEmails(
+      recipients,
+      subject,
+      content,
+      images || []
+    );
+
+    console.log(`Newsletter sent: ${emailResults.sent} successful, ${emailResults.failed} failed`);
+    if (emailResults.failed > 0) {
+      console.error('Email errors:', emailResults.errors);
+    }
 
     // Save newsletter to database
     const newsletter = await prisma.newsletter.create({
