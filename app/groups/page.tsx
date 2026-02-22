@@ -14,8 +14,10 @@ export default async function GroupsPage() {
     where: { id: session.userId },
     select: {
       id: true,
+      email: true,
       firstName: true,
       lastName: true,
+      accountType: true,
       profileImage: true,
     },
   });
