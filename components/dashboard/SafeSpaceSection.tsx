@@ -233,7 +233,7 @@ export default function SafeSpaceSection({ userId }: { userId: string }) {
 
       {/* Create Anonymous Post Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-purple-600" />
