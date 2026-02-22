@@ -68,7 +68,7 @@ function LoginForm() {
             <CardTitle className="text-2xl">Welcome Back</CardTitle>
             <CardDescription>Login to your Burton Latimer Connect account</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             {registered && (
               <div className="mb-4 rounded-md bg-accent/50 p-3 text-sm text-accent-foreground">
                 Registration successful! Please login with your credentials.

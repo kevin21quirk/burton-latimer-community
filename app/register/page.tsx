@@ -97,7 +97,7 @@ function RegisterForm() {
               Join Burton Latimer Connect and connect with your neighbours
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
