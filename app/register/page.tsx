@@ -94,7 +94,7 @@ function RegisterForm() {
           <CardHeader>
             <CardTitle className="text-2xl">Create Your Account</CardTitle>
             <CardDescription>
-              Join Burton Latimer Connect and connect with your neighbors
+              Join Burton Latimer Connect and connect with your neighbours
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -154,7 +154,7 @@ export default function DiscoverClient({
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Discover</h1>
-          <p className="text-muted-foreground">Find people, groups, and organizations that match your interests</p>
+          <p className="text-muted-foreground">Find people, groups, and organisations that match your interests</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">

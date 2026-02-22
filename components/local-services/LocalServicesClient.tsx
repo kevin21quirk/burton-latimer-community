@@ -193,7 +193,7 @@ export default function LocalServicesClient({
             </div>
             <h1 className="text-3xl font-bold">Local Services</h1>
             <p className="text-muted-foreground">
-              Trusted organizations and services in your community
+              Trusted organisations and services in your community
             </p>
           </div>
           <Button onClick={() => setShowAddDialog(true)} className="bg-indigo-600 hover:bg-indigo-700">
@@ -208,7 +208,7 @@ export default function LocalServicesClient({
             <DialogHeader>
               <DialogTitle>Add Local Service</DialogTitle>
               <DialogDescription>
-                Add a trusted organization or service to help the community
+                Add a trusted organisation or service to help the community
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddService} className="space-y-4">

@@ -92,7 +92,7 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Connect with neighbors, share experiences, ask for help, and build meaningful 
+                    Connect with neighbours, share experiences, ask for help, and build meaningful 
                     relationships within your local community. Stay informed about local events and news.
                   </p>
                 </CardContent>
@@ -149,7 +149,7 @@ export default function Home() {
                     <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent">
                       <span className="text-xs font-bold text-white">✓</span>
                     </div>
-                    <p className="text-muted-foreground">Connect isolated individuals with friendly neighbors</p>
+                    <p className="text-muted-foreground">Connect isolated individuals with friendly neighbours</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent">
@@ -180,7 +180,7 @@ export default function Home() {
                   </div>
                   <CardTitle>Create Your Profile</CardTitle>
                   <CardDescription>
-                    Register as an individual, charity, or business. Share your story and connect with neighbors.
+                    Register as an individual, charity, or business. Share your story and connect with neighbours.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -204,7 +204,7 @@ export default function Home() {
                   </div>
                   <CardTitle>Support Each Other</CardTitle>
                   <CardDescription>
-                    Join groups, message neighbors, and help vulnerable members of our community.
+                    Join groups, message neighbours, and help vulnerable members of our community.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -223,7 +223,7 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Stay updated with posts from your neighbors, local businesses, and community organizations.
+                    Stay updated with posts from your neighbours, local businesses, and community organisations.
                   </p>
                 </CardContent>
               </Card>
@@ -271,7 +271,7 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Join or create groups based on interests, neighborhoods, or causes.
+                    Join or create groups based on interests, neighbourhoods, or causes.
                   </p>
                 </CardContent>
               </Card>

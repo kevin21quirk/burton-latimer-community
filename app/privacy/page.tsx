@@ -96,7 +96,7 @@ export default function PrivacyPage() {
             </CardHeader>
             <CardContent className="prose max-w-none">
               <p>
-                We implement appropriate technical and organizational measures to protect your personal 
+                We implement appropriate technical and organisational measures to protect your personal 
                 data against unauthorized access, alteration, disclosure, or destruction. Your password 
                 is encrypted using industry-standard bcrypt hashing.
               </p>
