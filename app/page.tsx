@@ -66,6 +66,109 @@ export default function Home() {
           </div>
         </section>
 
+        {/* About the Platform Section */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-white via-accent/5 to-white py-20">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-4xl text-center">
+              <div className="mb-6 inline-block animate-fade-in rounded-full bg-accent/10 px-6 py-2">
+                <span className="text-sm font-semibold text-accent">ABOUT THE PLATFORM</span>
+              </div>
+              <h2 className="mb-6 animate-slide-up text-4xl font-bold md:text-5xl">
+                Bringing Burton Latimer Together
+              </h2>
+              <p className="mb-12 animate-slide-up text-lg text-muted-foreground" style={{ animationDelay: '0.1s' }}>
+                Burton Latimer Connect is more than just a social platform—it's a digital hub designed 
+                to strengthen our local community bonds and support those who need it most.
+              </p>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <Card className="group animate-fade-in border-2 transition-all duration-300 hover:border-accent hover:shadow-lg" style={{ animationDelay: '0.2s' }}>
+                <CardHeader>
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent/70 transition-transform duration-300 group-hover:scale-110">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <CardTitle className="text-xl">For Individuals</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Connect with neighbors, share experiences, ask for help, and build meaningful 
+                    relationships within your local community. Stay informed about local events and news.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="group animate-fade-in border-2 transition-all duration-300 hover:border-accent hover:shadow-lg" style={{ animationDelay: '0.3s' }}>
+                <CardHeader>
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent/70 transition-transform duration-300 group-hover:scale-110">
+                    <Heart className="h-8 w-8 text-white" />
+                  </div>
+                  <CardTitle className="text-xl">For Charities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Reach those in need, organize community support initiatives, share your mission, 
+                    and connect with volunteers and donors who want to make a difference.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="group animate-fade-in border-2 transition-all duration-300 hover:border-accent hover:shadow-lg" style={{ animationDelay: '0.4s' }}>
+                <CardHeader>
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent/70 transition-transform duration-300 group-hover:scale-110">
+                    <Building2 className="h-8 w-8 text-white" />
+                  </div>
+                  <CardTitle className="text-xl">For Businesses</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Promote your services to local customers, build brand awareness, engage with 
+                    the community, and support local causes while growing your business.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-16 animate-fade-in rounded-2xl bg-gradient-to-r from-accent/10 via-accent/5 to-accent/10 p-8 md:p-12" style={{ animationDelay: '0.5s' }}>
+              <div className="mx-auto max-w-3xl text-center">
+                <h3 className="mb-4 text-2xl font-bold md:text-3xl">
+                  Supporting Our Vulnerable Community Members
+                </h3>
+                <p className="mb-6 text-lg text-muted-foreground">
+                  At the heart of Burton Latimer Connect is our commitment to supporting elderly, 
+                  vulnerable, and isolated members of our community. Our platform makes it easy to:
+                </p>
+                <div className="grid gap-4 text-left md:grid-cols-2">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent">
+                      <span className="text-xs font-bold text-white">✓</span>
+                    </div>
+                    <p className="text-muted-foreground">Request and offer help with daily tasks and errands</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent">
+                      <span className="text-xs font-bold text-white">✓</span>
+                    </div>
+                    <p className="text-muted-foreground">Connect isolated individuals with friendly neighbors</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent">
+                      <span className="text-xs font-bold text-white">✓</span>
+                    </div>
+                    <p className="text-muted-foreground">Share important local services and resources</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent">
+                      <span className="text-xs font-bold text-white">✓</span>
+                    </div>
+                    <p className="text-muted-foreground">Build a safer, more connected community for everyone</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section id="how-it-works" className="py-20">
           <div className="container mx-auto px-4">
             <h2 className="mb-12 text-center text-4xl font-bold">How It Works</h2>
