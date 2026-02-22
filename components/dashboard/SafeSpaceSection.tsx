@@ -138,10 +138,10 @@ export default function SafeSpaceSection({ userId }: { userId: string }) {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-2">
             <Button 
               onClick={() => setShowCreateDialog(true)}
-              className="flex-1 bg-purple-600 hover:bg-purple-700"
+              className="w-full bg-purple-600 hover:bg-purple-700"
             >
               <Lock className="mr-2 h-4 w-4" />
               Post Anonymously
@@ -152,7 +152,7 @@ export default function SafeSpaceSection({ userId }: { userId: string }) {
                 if (!showMyPosts) fetchAnonymousPosts();
               }}
               variant="outline"
-              className="flex-1 border-purple-300 text-purple-700 hover:bg-purple-50"
+              className="w-full border-purple-300 text-purple-700 hover:bg-purple-50"
             >
               {showMyPosts ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
               {showMyPosts ? "Hide" : "View"} My Posts
