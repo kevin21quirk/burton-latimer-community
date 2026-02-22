@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,9 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-export const dynamic = 'force-dynamic';
-
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const [accountType, setAccountType] = useState<string>("INDIVIDUAL");
   const [loading, setLoading] = useState(false);
@@ -314,5 +312,13 @@ export default function RegisterPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }
