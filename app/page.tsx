@@ -8,9 +8,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-white">
-        <div className="container mx-auto flex h-24 items-center justify-between px-4">
+        <div className="container mx-auto flex h-16 sm:h-20 md:h-24 items-center justify-between px-4">
           <Link href="/" className="flex h-full items-center">
-            <div className="relative h-full w-auto" style={{ aspectRatio: '785/667' }}>
+            <div className="relative h-full w-auto max-w-[150px] sm:max-w-[200px] md:max-w-none" style={{ aspectRatio: '785/667' }}>
               <Image
                 src="/logos/BL-Connect-Trans.png"
                 alt="Burton Latimer Connect Logo"
@@ -21,19 +21,19 @@ export default function Home() {
               />
             </div>
           </Link>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-2 sm:gap-4">
             <Link href="/login">
-              <Button variant="ghost">Login</Button>
+              <Button variant="ghost" size="sm" className="sm:h-10">Login</Button>
             </Link>
             <Link href="/register">
-              <Button>Register</Button>
+              <Button size="sm" className="sm:h-10">Register</Button>
             </Link>
           </nav>
         </div>
       </header>
 
       <main>
-        <section className="relative bg-gradient-to-b from-white to-muted py-20">
+        <section className="relative bg-gradient-to-b from-white to-muted py-12 sm:py-16 md:py-20">
           <div className="absolute inset-0 z-0">
             <Image
               src="/Hero images/burton-town.webp"
@@ -44,10 +44,10 @@ export default function Home() {
             />
           </div>
           <div className="container relative z-10 mx-auto px-4 text-center">
-            <h1 className="mb-6 text-5xl font-bold tracking-tight text-black md:text-6xl" style={{ textShadow: '-2px -2px 0 #B8860B, 2px -2px 0 #B8860B, -2px 2px 0 #B8860B, 2px 2px 0 #B8860B, -3px -3px 0 #B8860B, 3px -3px 0 #B8860B, -3px 3px 0 #B8860B, 3px 3px 0 #B8860B' }}>
+            <h1 className="mb-4 sm:mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black" style={{ textShadow: '-2px -2px 0 #B8860B, 2px -2px 0 #B8860B, -2px 2px 0 #B8860B, 2px 2px 0 #B8860B, -3px -3px 0 #B8860B, 3px -3px 0 #B8860B, -3px 3px 0 #B8860B, 3px 3px 0 #B8860B' }}>
               Welcome to Burton Latimer Connect
             </h1>
-            <p className="mx-auto mb-8 max-w-2xl text-xl text-black">
+            <p className="mx-auto mb-6 sm:mb-8 max-w-2xl text-base sm:text-lg md:text-xl text-black px-4">
               A social platform bringing together individuals, charities, and businesses 
               to support and connect with our local community.
             </p>
@@ -67,16 +67,16 @@ export default function Home() {
         </section>
 
         {/* About the Platform Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-white via-accent/5 to-white py-20">
+        <section className="relative overflow-hidden bg-gradient-to-br from-white via-accent/5 to-white py-12 sm:py-16 md:py-20">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl text-center">
-              <div className="mb-6 inline-block animate-fade-in rounded-full bg-accent/10 px-6 py-2">
-                <span className="text-sm font-semibold text-accent">ABOUT THE PLATFORM</span>
+              <div className="mb-4 sm:mb-6 inline-block animate-fade-in rounded-full bg-accent/10 px-4 sm:px-6 py-2">
+                <span className="text-xs sm:text-sm font-semibold text-accent">ABOUT THE PLATFORM</span>
               </div>
-              <h2 className="mb-6 animate-slide-up text-4xl font-bold md:text-5xl">
+              <h2 className="mb-4 sm:mb-6 animate-slide-up text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold">
                 Bringing Burton Latimer Together
               </h2>
-              <p className="mb-12 animate-slide-up text-lg text-muted-foreground" style={{ animationDelay: '0.1s' }}>
+              <p className="mb-8 sm:mb-12 animate-slide-up text-base sm:text-lg text-muted-foreground px-4" style={{ animationDelay: '0.1s' }}>
                 Burton Latimer Connect is more than just a social platform—it's a digital hub designed 
                 to strengthen our local community bonds and support those who need it most.
               </p>
@@ -169,9 +169,9 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="how-it-works" className="py-20">
+        <section id="how-it-works" className="py-12 sm:py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <h2 className="mb-12 text-center text-4xl font-bold">How It Works</h2>
+            <h2 className="mb-8 sm:mb-12 text-center text-2xl sm:text-3xl md:text-4xl font-bold">How It Works</h2>
             <div className="grid gap-8 md:grid-cols-3">
               <Card>
                 <CardHeader>
@@ -212,9 +212,9 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-muted py-20">
+        <section className="bg-muted py-12 sm:py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <h2 className="mb-12 text-center text-4xl font-bold">Platform Features</h2>
+            <h2 className="mb-8 sm:mb-12 text-center text-2xl sm:text-3xl md:text-4xl font-bold">Platform Features</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader>

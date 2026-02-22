@@ -717,9 +717,9 @@ export default function DashboardClient({
         </DialogContent>
       </Dialog>
 
-      <div className="mx-auto max-w-[1920px] px-4 py-4">
-        <div className="grid gap-4 lg:grid-cols-12">
-          {/* Left Sidebar - Hidden on mobile */}
+      <div className="mx-auto max-w-[1920px] px-2 sm:px-4 py-2 sm:py-4">
+        <div className="grid gap-2 sm:gap-4 lg:grid-cols-12">
+          {/* Left Sidebar - Hidden on mobile and tablet */}
           <aside className="hidden lg:col-span-3 lg:block">
             <div className="sticky top-20 space-y-2">
               {/* Home */}
@@ -819,7 +819,7 @@ export default function DashboardClient({
           </aside>
 
           {/* Main Feed */}
-          <main className="lg:col-span-6">
+          <main className="lg:col-span-6 col-span-full">
             {/* Create Post Box */}
             <Card className="mb-4 shadow-sm">
               <CardHeader className="pb-3">
