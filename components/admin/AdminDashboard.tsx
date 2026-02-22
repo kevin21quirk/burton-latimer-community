@@ -631,6 +631,12 @@ export default function AdminDashboard({
             <h1 className="text-xl font-bold">Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/admin/newsletter">
+              <Button variant="outline" size="sm">
+                <Mail className="mr-2 h-4 w-4" />
+                Newsletter
+              </Button>
+            </Link>
             <Link href="/dashboard">
               <Button variant="outline" size="sm">
                 <Home className="mr-2 h-4 w-4" />

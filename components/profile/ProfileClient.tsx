@@ -111,19 +111,39 @@ export default function ProfileClient({ user }: { user: User }) {
     }
   };
 
-  const handleMarketingConsentChange = async (checked: boolean) => {
+  const handleMarketingConsentChange = (checked: boolean) => {
     setMarketingConsent(checked);
+  };
+
+  const handleSavePreferences = async () => {
+    setLoading(true);
+    setError("");
     
-    if (checked) {
-      try {
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ marketingConsent }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save preferences");
+      }
+
+      if (marketingConsent) {
         await fetch("/api/profile/email-signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: user.email, name: `${user.firstName} ${user.lastName}` }),
         });
-      } catch (err) {
-        console.error("Failed to sign up for email notifications:", err);
       }
+
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError("Failed to save communication preferences. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -481,6 +501,10 @@ export default function ProfileClient({ user }: { user: User }) {
                       Community
                     </Label>
                   </div>
+                  <Button onClick={handleSavePreferences} disabled={loading} size="sm">
+                    <Save className="mr-2 h-4 w-4" />
+                    {loading ? "Saving..." : "Save Preferences"}
+                  </Button>
                 </div>
 
                 <div className="space-y-4 border-t pt-4">
