@@ -185,9 +185,9 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
   return (
     <TooltipProvider>
       <header className="sticky top-0 z-50 border-b border-gray-300 bg-white shadow-sm">
-        <div className="mx-auto flex h-14 max-w-[1920px] items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-[1920px] items-center justify-between px-2 sm:px-4 gap-1 sm:gap-2">
           {/* Left: Logo and Search */}
-          <div className="flex items-center gap-2 lg:w-80">
+          <div className="flex items-center gap-1 sm:gap-2 lg:w-80 flex-shrink-0">
             <Link href="/dashboard" className="flex items-center">
               <div className="relative h-10 w-10">
                 <Image
@@ -211,16 +211,16 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
           </div>
 
           {/* Center: Navigation Icons */}
-          <nav className="flex items-center justify-center gap-2">
+          <nav className="flex items-center justify-center gap-0.5 sm:gap-1 md:gap-2 flex-shrink">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link href="/dashboard">
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className={`h-12 w-20 rounded-lg hover:bg-gray-100 ${currentPage === 'dashboard' ? 'border-b-4 border-accent' : ''}`}
+                    className={`h-10 w-10 sm:h-12 sm:w-16 md:w-20 rounded-lg hover:bg-gray-100 ${currentPage === 'dashboard' ? 'border-b-4 border-accent' : ''}`}
                   >
-                    <Home className={`h-6 w-6 ${currentPage === 'dashboard' ? 'text-accent' : 'text-gray-600'}`} />
+                    <Home className={`h-5 w-5 sm:h-6 sm:w-6 ${currentPage === 'dashboard' ? 'text-accent' : 'text-gray-600'}`} />
                   </Button>
                 </Link>
               </TooltipTrigger>
@@ -234,9 +234,9 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className={`h-12 w-20 rounded-lg hover:bg-gray-100 ${currentPage === 'groups' ? 'border-b-4 border-accent' : ''}`}
+                    className={`h-10 w-10 sm:h-12 sm:w-16 md:w-20 rounded-lg hover:bg-gray-100 ${currentPage === 'groups' ? 'border-b-4 border-accent' : ''}`}
                   >
-                    <Users className={`h-6 w-6 ${currentPage === 'groups' ? 'text-accent' : 'text-gray-600'}`} />
+                    <Users className={`h-5 w-5 sm:h-6 sm:w-6 ${currentPage === 'groups' ? 'text-accent' : 'text-gray-600'}`} />
                   </Button>
                 </Link>
               </TooltipTrigger>
@@ -250,9 +250,9 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className={`h-12 w-20 rounded-lg hover:bg-gray-100 ${currentPage === 'contacts' ? 'border-b-4 border-accent' : ''}`}
+                    className={`h-10 w-10 sm:h-12 sm:w-16 md:w-20 rounded-lg hover:bg-gray-100 ${currentPage === 'contacts' ? 'border-b-4 border-accent' : ''}`}
                   >
-                    <UserCircle className={`h-6 w-6 ${currentPage === 'contacts' ? 'text-accent' : 'text-gray-600'}`} />
+                    <UserCircle className={`h-5 w-5 sm:h-6 sm:w-6 ${currentPage === 'contacts' ? 'text-accent' : 'text-gray-600'}`} />
                   </Button>
                 </Link>
               </TooltipTrigger>
@@ -266,9 +266,9 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className={`relative h-12 w-20 rounded-lg hover:bg-gray-100 ${currentPage === 'messages' ? 'border-b-4 border-accent' : ''}`}
+                    className={`relative h-10 w-10 sm:h-12 sm:w-16 md:w-20 rounded-lg hover:bg-gray-100 ${currentPage === 'messages' ? 'border-b-4 border-accent' : ''}`}
                   >
-                    <MessageCircle className={`h-6 w-6 ${currentPage === 'messages' ? 'text-accent' : 'text-gray-600'}`} />
+                    <MessageCircle className={`h-5 w-5 sm:h-6 sm:w-6 ${currentPage === 'messages' ? 'text-accent' : 'text-gray-600'}`} />
                   </Button>
                 </Link>
               </TooltipTrigger>
@@ -279,7 +279,7 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
           </nav>
 
           {/* Right: User Menu and Icons */}
-          <div className="flex items-center gap-2 lg:w-80 lg:justify-end">
+          <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2 lg:w-80 lg:justify-end flex-shrink-0">
             <Popover>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -415,7 +415,7 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
               <Tooltip>
                 <TooltipTrigger asChild>
                   <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200">
+                    <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-100 hover:bg-gray-200">
                       <Bell className="h-5 w-5" />
                     </Button>
                   </PopoverTrigger>
@@ -446,7 +446,7 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link href="/admin">
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-100 hover:bg-gray-200">
                       <Shield className="h-5 w-5 text-accent" />
                     </Button>
                   </Link>
@@ -458,7 +458,7 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
             )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="h-10 w-10 cursor-pointer border-2 border-transparent hover:border-gray-300">
+              <Avatar className="h-8 w-8 sm:h-10 sm:w-10 cursor-pointer border-2 border-transparent hover:border-gray-300">
                 {user.profileImage ? (
                   <Image
                     src={user.profileImage}
