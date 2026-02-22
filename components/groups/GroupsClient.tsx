@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,12 +11,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Users, Lock, Globe } from "lucide-react";
+import { ArrowLeft, Plus, Users, Lock, Globe, Settings } from "lucide-react";
+import PlatformHeader from "@/components/shared/PlatformHeader";
 
 type User = {
   id: string;
+  email: string;
   firstName: string;
   lastName: string;
+  accountType: string;
   profileImage: string | null;
 };
 
@@ -26,6 +30,7 @@ type Group = {
   image: string | null;
   isPrivate: boolean;
   createdAt: Date;
+  status?: string;
   members: { userId: string; role: string }[];
   _count: {
     members: number;
@@ -40,14 +45,30 @@ type UserGroup = {
   group: Group;
 };
 
+type CreatedGroup = {
+  id: string;
+  name: string;
+  description: string | null;
+  image: string | null;
+  isPrivate: boolean;
+  status: string;
+  createdAt: Date;
+  _count: {
+    members: number;
+    posts: number;
+  };
+};
+
 export default function GroupsClient({
   user,
   groups,
   userGroups,
+  createdGroups,
 }: {
   user: User;
   groups: Group[];
   userGroups: UserGroup[];
+  createdGroups: CreatedGroup[];
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,10 +78,14 @@ export default function GroupsClient({
     e.preventDefault();
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const data = {
       name: formData.get("name"),
       description: formData.get("description"),
+      interests: formData.get("interests") 
+        ? (formData.get("interests") as string).split(",").map(i => i.trim()).filter(i => i.length > 0)
+        : [],
       isPrivate: formData.get("isPrivate") === "on",
     };
 
@@ -72,13 +97,16 @@ export default function GroupsClient({
       });
 
       if (response.ok) {
-        const newGroup = await response.json();
-        setAllGroups([newGroup, ...allGroups]);
+        const result = await response.json();
+        form.reset();
         setOpen(false);
-        e.currentTarget.reset();
+        alert("Group created successfully! It will appear once an admin approves it.");
+      } else {
+        alert("Failed to create group. Please try again.");
       }
     } catch (error) {
       console.error("Error creating group:", error);
+      alert("Error creating group. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -135,20 +163,12 @@ export default function GroupsClient({
   const isMember = (group: Group) => group.members.some((m) => m.userId === user.id);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border bg-white">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-primary" />
-              <span className="text-xl font-bold">Community Groups</span>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-100">
+      <PlatformHeader user={user} currentPage="groups" />
+
+      <div className="container mx-auto px-4 py-6">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Community Groups</h1>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -160,52 +180,95 @@ export default function GroupsClient({
               <DialogHeader>
                 <DialogTitle>Create a New Group</DialogTitle>
                 <DialogDescription>
-                  Start a new community group for people with shared interests
+                  Create a community group. It will be reviewed by an admin before becoming visible.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateGroup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Group Name *</Label>
-                  <Input id="name" name="name" required />
+                <div>
+                  <Label htmlFor="name">Group Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="Enter group name"
+                    required
+                  />
                 </div>
-                <div className="space-y-2">
+                <div>
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
                     name="description"
-                    placeholder="What is this group about?"
+                    placeholder="Describe your group"
                     rows={3}
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <input type="checkbox" id="isPrivate" name="isPrivate" />
-                  <Label htmlFor="isPrivate" className="text-sm font-normal">
-                    Make this group private (members must be approved)
+                <div>
+                  <Label htmlFor="interests">Interests (Optional)</Label>
+                  <Input
+                    id="interests"
+                    name="interests"
+                    placeholder="e.g., Gardening, Cooking, Sports (comma-separated)"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Help people discover your group based on shared interests
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="isPrivate"
+                    name="isPrivate"
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="isPrivate" className="cursor-pointer">
+                    Make this group private
                   </Label>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating..." : "Create Group"}
-                </Button>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? "Creating..." : "Create Group"}
+                  </Button>
+                </div>
               </form>
             </DialogContent>
           </Dialog>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="all">All Groups</TabsTrigger>
-            <TabsTrigger value="my-groups">My Groups ({userGroups.length})</TabsTrigger>
+            <TabsTrigger value="my-groups">
+              My Groups ({createdGroups.filter(g => g.status !== "REJECTED").length + userGroups.filter(ug => !createdGroups.some(cg => cg.id === ug.group.id)).length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="all">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {allGroups.map((group) => (
-                <Card key={group.id}>
+            {allGroups.length === 0 ? (
+              <div className="col-span-full py-12 text-center">
+                <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="mb-2 text-lg font-semibold">No groups available yet</p>
+                <p className="text-muted-foreground">
+                  Be the first to create a community group! Click "Create Group" above to get started.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {allGroups.map((group) => (
+                  <Card key={group.id}>
                   <CardHeader>
-                    <div className="mb-2 flex h-24 items-center justify-center rounded-lg bg-accent">
-                      <Users className="h-12 w-12 text-accent-foreground" />
+                    <div className="mb-2 flex h-24 items-center justify-center rounded-lg bg-accent overflow-hidden">
+                      {group.image ? (
+                        <img src={group.image} alt={group.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <Users className="h-12 w-12 text-accent-foreground" />
+                      )}
                     </div>
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{group.name}</CardTitle>
@@ -246,16 +309,73 @@ export default function GroupsClient({
                   </CardContent>
                 </Card>
               ))}
-            </div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="my-groups">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {userGroups.map((userGroup) => (
+              {/* Created Groups (exclude rejected) */}
+              {createdGroups.filter(g => g.status !== "REJECTED").map((group) => (
+                <Card key={group.id}>
+                  <CardHeader>
+                    <div className="mb-2 flex h-24 items-center justify-center rounded-lg bg-accent overflow-hidden">
+                      {group.image ? (
+                        <img src={group.image} alt={group.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <Users className="h-12 w-12 text-accent-foreground" />
+                      )}
+                    </div>
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-lg">{group.name}</CardTitle>
+                      {group.isPrivate ? (
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                    <CardDescription>
+                      {group.description || "No description provided"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4 flex gap-4 text-sm text-muted-foreground">
+                      <span>{group._count.members} members</span>
+                      <span>{group._count.posts} posts</span>
+                    </div>
+                    <div className="space-y-2">
+                      <Badge 
+                        variant={group.status === "PENDING" ? "default" : group.status === "APPROVED" ? "secondary" : "destructive"}
+                        className="w-full justify-center"
+                      >
+                        {group.status === "PENDING" ? "⏳ Pending Admin Approval" : group.status === "APPROVED" ? "✓ Approved" : "✗ Rejected"}
+                      </Badge>
+                      <Badge variant="outline" className="w-full justify-center">
+                        Creator (Admin)
+                      </Badge>
+                      {group.status === "APPROVED" && (
+                        <Link href={`/groups/${group.id}/manage`}>
+                          <Button variant="default" className="w-full">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Manage Group
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {/* Joined Groups (exclude created groups to avoid duplicates) */}
+              {userGroups.filter(ug => !createdGroups.some(cg => cg.id === ug.group.id)).map((userGroup) => (
                 <Card key={userGroup.id}>
                   <CardHeader>
-                    <div className="mb-2 flex h-24 items-center justify-center rounded-lg bg-accent">
-                      <Users className="h-12 w-12 text-accent-foreground" />
+                    <div className="mb-2 flex h-24 items-center justify-center rounded-lg bg-accent overflow-hidden">
+                      {userGroup.group.image ? (
+                        <img src={userGroup.group.image} alt={userGroup.group.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <Users className="h-12 w-12 text-accent-foreground" />
+                      )}
                     </div>
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{userGroup.group.name}</CardTitle>
@@ -289,12 +409,12 @@ export default function GroupsClient({
                   </CardContent>
                 </Card>
               ))}
-              {userGroups.length === 0 && (
+              {userGroups.filter(ug => !createdGroups.some(cg => cg.id === ug.group.id)).length === 0 && createdGroups.filter(g => g.status !== "REJECTED").length === 0 && (
                 <div className="col-span-full py-12 text-center">
                   <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                   <p className="text-muted-foreground">
-                    You haven't joined any groups yet. Browse all groups to find communities
-                    that interest you!
+                    You haven't created or joined any groups yet. Browse all groups to find communities
+                    that interest you, or create your own!
                   </p>
                 </div>
               )}

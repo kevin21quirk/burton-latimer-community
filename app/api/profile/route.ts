@@ -13,6 +13,7 @@ const updateProfileSchema = z.object({
   companyName: z.string().optional(),
   charityNumber: z.string().optional(),
   bio: z.string().optional(),
+  interests: z.array(z.string()).optional(),
   marketingConsent: z.boolean().optional(),
 });
 
@@ -34,6 +35,7 @@ export async function PUT(request: NextRequest) {
         companyName: data.companyName,
         charityNumber: data.charityNumber,
         bio: data.bio,
+        interests: data.interests,
         marketingConsent: data.marketingConsent,
       },
       select: {

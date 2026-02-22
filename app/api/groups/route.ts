@@ -6,6 +6,7 @@ import { z } from "zod";
 const createGroupSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  interests: z.array(z.string()).optional(),
   isPrivate: z.boolean().default(false),
 });
 
@@ -19,15 +20,25 @@ export async function POST(request: NextRequest) {
       data: {
         name: data.name,
         description: data.description,
+        interests: data.interests || [],
         isPrivate: data.isPrivate,
+        status: "PENDING", // Requires admin approval
+        creatorId: session.userId,
         members: {
           create: {
             userId: session.userId,
-            role: "admin",
+            role: "ADMIN", // Creator is automatically an admin
           },
         },
       },
       include: {
+        creator: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
         members: {
           select: {
             userId: true,
@@ -43,7 +54,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(group, { status: 201 });
+    return NextResponse.json({ 
+      ...group, 
+      message: "Group created and pending admin approval" 
+    }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -63,7 +77,17 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const groups = await prisma.group.findMany({
+      where: {
+        status: "APPROVED",
+      },
       include: {
+        creator: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
         members: {
           select: {
             userId: true,

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Save } from "lucide-react";
+import PlatformHeader from "@/components/shared/PlatformHeader";
 
 type User = {
   id: string;
@@ -27,6 +29,7 @@ type User = {
   bio: string | null;
   profileImage: string | null;
   coverImage: string | null;
+  interests: string[];
   marketingConsent: boolean;
   createdAt: Date;
 };
@@ -53,6 +56,9 @@ export default function ProfileClient({ user }: { user: User }) {
       companyName: formData.get("companyName"),
       charityNumber: formData.get("charityNumber"),
       bio: formData.get("bio"),
+      interests: formData.get("interests") 
+        ? (formData.get("interests") as string).split(",").map(i => i.trim()).filter(i => i.length > 0)
+        : [],
       marketingConsent: formData.get("marketingConsent") === "on",
     };
 
@@ -78,19 +84,7 @@ export default function ProfileClient({ user }: { user: User }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border bg-white">
-        <div className="container mx-auto flex h-16 items-center gap-4 px-4">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-primary" />
-            <span className="text-xl font-bold">Profile Settings</span>
-          </div>
-        </div>
-      </header>
+      <PlatformHeader user={user} currentPage="profile" />
 
       <div className="container mx-auto max-w-4xl px-4 py-6">
         <Card className="mb-6">
@@ -246,6 +240,19 @@ export default function ProfileClient({ user }: { user: User }) {
                       rows={4}
                       defaultValue={user.bio || ""}
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="interests">Interests</Label>
+                    <Input
+                      id="interests"
+                      name="interests"
+                      placeholder="e.g., Gardening, Cooking, Sports (comma-separated)"
+                      defaultValue={user.interests.join(", ")}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Help us connect you with people who share your interests
+                    </p>
                   </div>
 
                   <Button type="submit" disabled={loading}>

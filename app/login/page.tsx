@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,16 +51,22 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold">
-            <div className="h-8 w-8 rounded-full bg-primary" />
-            Burton Latimer Community
+          <Link href="/" className="inline-flex flex-col items-center gap-2">
+            <Image
+              src="/logos/BL-Connect-Trans.png"
+              alt="Burton Latimer Connect Logo"
+              width={300}
+              height={300}
+              className="h-32 w-auto"
+              priority
+            />
           </Link>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription>Login to your Burton Latimer Community account</CardDescription>
+            <CardDescription>Login to your Burton Latimer Connect account</CardDescription>
           </CardHeader>
           <CardContent>
             {registered && (

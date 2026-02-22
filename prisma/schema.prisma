@@ -21,162 +21,455 @@ enum PostType {
 }
 
 model User {
-  id            String      @id @default(cuid())
-  email         String      @unique
-  password      String
-  accountType   AccountType
-  
-  firstName     String
-  lastName      String
-  dateOfBirth   DateTime?
-  phoneNumber   String?
-  address       String?
-  city          String      @default("Burton Latimer")
-  postcode      String?
-  
+  id          String      @id @default(cuid())
+  email       String      @unique
+  password    String
+  accountType AccountType
+
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime?
+  phoneNumber String?
+  address     String?
+  city        String    @default("Burton Latimer")
+  postcode    String?
+
   companyName   String?
   charityNumber String?
+  charityName   String?
+  businessType  String?
+  website       String?
+  description   String?
   bio           String?
   profileImage  String?
   coverImage    String?
-  
-  gdprConsent   Boolean     @default(false)
-  marketingConsent Boolean  @default(false)
-  
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  lastLogin     DateTime?
-  
-  posts         Post[]
-  comments      Comment[]
-  likes         Like[]
-  sentMessages  Message[]   @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  groupMembers  GroupMember[]
-  followers     Follow[]    @relation("Following")
-  following     Follow[]    @relation("Followers")
-  
+  interests     String[] @default([])
+
+  gdprConsent      Boolean @default(false)
+  marketingConsent Boolean @default(false)
+  isAdmin          Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
+
+  posts             Post[]
+  comments          Comment[]
+  likes             Like[]
+  sentMessages      Message[]          @relation("SentMessages")
+  receivedMessages  Message[]          @relation("ReceivedMessages")
+  groupMembers      GroupMember[]
+  createdGroups     Group[]            @relation("CreatedGroups")
+  groupJoinRequests GroupJoinRequest[]
+  followers         Follow[]           @relation("Following")
+  following         Follow[]           @relation("Followers")
+
+  connectionRequests Connection[] @relation("ConnectionRequests")
+  connectionReceived Connection[] @relation("ConnectionReceived")
+
+  reportsSubmitted Report[] @relation("ReportsSubmitted")
+  reportsReceived  Report[] @relation("ReportsReceived")
+  reportsReviewed  Report[] @relation("ReportsReviewed")
+
+  helpRequests             HelpRequest[]                 @relation("HelpRequests")
+  helpOffers               HelpRequest[]                 @relation("HelpOffers")
+  createdServices          LocalService[]                @relation("CreatedServices")
+  createdResources         WellbeingResource[]           @relation("CreatedResources")
+  createdAlerts            Alert[]                       @relation("CreatedAlerts")
+  accessibilityPreferences UserAccessibilityPreferences? @relation("AccessibilityPreferences")
+
   @@index([email])
   @@index([accountType])
 }
 
 model Post {
-  id          String    @id @default(cuid())
-  content     String
-  postType    PostType  @default(GENERAL)
-  images      String[]
-  
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  comments    Comment[]
-  likes       Like[]
-  
-  groupId     String?
-  group       Group?    @relation(fields: [groupId], references: [id])
-  
+  id       String   @id @default(cuid())
+  content  String
+  postType PostType @default(GENERAL)
+  images   String[]
+  video    String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments Comment[]
+  likes    Like[]
+
+  groupId String?
+  group   Group?  @relation(fields: [groupId], references: [id])
+
   @@index([userId])
   @@index([createdAt])
   @@index([postType])
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+  id      String @id @default(cuid())
+  content String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([postId])
   @@index([userId])
 }
 
 model Like {
-  id        String   @id @default(cuid())
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
-  
+
   @@unique([userId, postId])
   @@index([postId])
 }
 
 model Message {
-  id         String   @id @default(cuid())
-  content    String
-  read       Boolean  @default(false)
-  
-  senderId   String
-  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  
+  id       String  @id @default(cuid())
+  content  String
+  read     Boolean @default(false)
+  archived Boolean @default(false)
+
+  senderId String
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
   receiverId String
-  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  
-  createdAt  DateTime @default(now())
-  
+  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@index([senderId])
   @@index([receiverId])
   @@index([createdAt])
 }
 
+enum GroupStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum GroupMemberRole {
+  ADMIN
+  MEMBER
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Group {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   description String?
   image       String?
-  isPrivate   Boolean  @default(false)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  members     GroupMember[]
-  posts       Post[]
-  
+  isPrivate   Boolean     @default(false)
+  status      GroupStatus @default(PENDING)
+  interests   String[]    @default([])
+
+  creatorId String
+  creator   User   @relation("CreatedGroups", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members      GroupMember[]
+  posts        Post[]
+  joinRequests GroupJoinRequest[]
+
   @@index([name])
+  @@index([creatorId])
+  @@index([status])
 }
 
 model GroupMember {
-  id        String   @id @default(cuid())
-  role      String   @default("member")
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  groupId   String
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  
-  joinedAt  DateTime @default(now())
-  
+  id   String          @id @default(cuid())
+  role GroupMemberRole @default(MEMBER)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
   @@unique([userId, groupId])
   @@index([groupId])
 }
 
+model GroupJoinRequest {
+  id     String            @id @default(cuid())
+  status JoinRequestStatus @default(PENDING)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+  @@index([userId])
+}
+
 model Follow {
-  id          String   @id @default(cuid())
-  
-  followerId  String
-  follower    User     @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
-  
+  id String @id @default(cuid())
+
+  followerId String
+  follower   User   @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+
   followingId String
-  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  
+  following   User   @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+model Connection {
+  id     String           @id @default(cuid())
+  status ConnectionStatus @default(PENDING)
+
+  requesterId String
+  requester   User   @relation("ConnectionRequests", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  addresseeId String
+  addressee   User   @relation("ConnectionReceived", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([requesterId, addresseeId])
+  @@index([requesterId])
+  @@index([addresseeId])
+  @@index([status])
+}
+
+enum ReportStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE_CONTENT
+  FAKE_ACCOUNT
+  OTHER
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  reason      ReportReason
+  description String?
+  status      ReportStatus @default(PENDING)
+
+  reporterId String
+  reporter   User   @relation("ReportsSubmitted", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  reportedId String
+  reported   User   @relation("ReportsReceived", fields: [reportedId], references: [id], onDelete: Cascade)
+
+  reviewedBy String?
+  reviewer   User?   @relation("ReportsReviewed", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([reporterId])
+  @@index([reportedId])
+  @@index([status])
+}
+
+enum HelpRequestType {
+  COMPANIONSHIP
+  FOOD_SUPPORT
+  TRANSPORT
+  HOME_HELP
+  EMERGENCY
+  OTHER
+}
+
+enum HelpRequestStatus {
+  OPEN
+  IN_PROGRESS
+  FULFILLED
+  CANCELLED
+}
+
+enum HelpRequestUrgency {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model HelpRequest {
+  id          String             @id @default(cuid())
+  title       String
+  description String
+  type        HelpRequestType
+  urgency     HelpRequestUrgency @default(MEDIUM)
+  status      HelpRequestStatus  @default(OPEN)
+  location    String?
+
+  requesterId String
+  requester   User   @relation("HelpRequests", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  helperId String?
+  helper   User?   @relation("HelpOffers", fields: [helperId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  fulfilledAt DateTime?
+
+  @@index([requesterId])
+  @@index([helperId])
+  @@index([status])
+  @@index([urgency])
+  @@index([createdAt])
+}
+
+enum ServiceCategory {
+  CARE_PROVIDER
+  CHARITY
+  COUNCIL_SERVICE
+  COMMUNITY_CENTRE
+  FOOD_BANK
+  HEALTH_SERVICE
+  OTHER
+}
+
+model LocalService {
+  id          String          @id @default(cuid())
+  name        String
+  description String
+  category    ServiceCategory
+  address     String?
+  phoneNumber String?
+  email       String?
+  website     String?
+  isVerified  Boolean         @default(false)
+
+  createdById String
+  createdBy   User   @relation("CreatedServices", fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isVerified])
+}
+
+enum ResourceCategory {
+  MENTAL_WELLBEING
+  FINANCIAL_ADVICE
+  FOOD_SUPPORT
+  LOCAL_AUTHORITY
+  ONLINE_SAFETY
+  GENERAL_GUIDANCE
+}
+
+model WellbeingResource {
+  id          String           @id @default(cuid())
+  title       String
+  description String
+  content     String
+  category    ResourceCategory
+  externalUrl String?
+  isPublished Boolean          @default(false)
+
+  createdById String
+  createdBy   User   @relation("CreatedResources", fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isPublished])
+}
+
+enum AlertType {
+  URGENT_HELP
+  WEATHER_WARNING
+  SAFETY_ALERT
+  PLATFORM_ANNOUNCEMENT
+  COMMUNITY_UPDATE
+}
+
+enum AlertPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Alert {
+  id        String        @id @default(cuid())
+  title     String
+  message   String
+  type      AlertType
+  priority  AlertPriority @default(MEDIUM)
+  isActive  Boolean       @default(true)
+  expiresAt DateTime?
+
+  createdById String
+  createdBy   User   @relation("CreatedAlerts", fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([priority])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+enum TextSize {
+  SMALL
+  MEDIUM
+  LARGE
+  EXTRA_LARGE
+}
+
+model UserAccessibilityPreferences {
+  id           String   @id @default(cuid())
+  textSize     TextSize @default(MEDIUM)
+  highContrast Boolean  @default(false)
+  simpleMode   Boolean  @default(false)
+  reduceMotion Boolean  @default(false)
+
+  userId String @unique
+  user   User   @relation("AccessibilityPreferences", fields: [userId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }

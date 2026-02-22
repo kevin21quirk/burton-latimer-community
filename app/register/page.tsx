@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,19 +24,26 @@ export default function RegisterPage() {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      accountType: formData.get("accountType"),
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName"),
-      dateOfBirth: formData.get("dateOfBirth"),
-      phoneNumber: formData.get("phoneNumber"),
-      address: formData.get("address"),
-      city: formData.get("city") || "Burton Latimer",
-      postcode: formData.get("postcode"),
-      companyName: formData.get("companyName"),
-      charityNumber: formData.get("charityNumber"),
-      bio: formData.get("bio"),
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+      accountType: accountType as "INDIVIDUAL" | "CHARITY" | "COMPANY",
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      dateOfBirth: formData.get("dateOfBirth") ? (formData.get("dateOfBirth") as string) : undefined,
+      phoneNumber: formData.get("phoneNumber") ? (formData.get("phoneNumber") as string) : undefined,
+      address: formData.get("address") ? (formData.get("address") as string) : undefined,
+      city: (formData.get("city") as string) || "Burton Latimer",
+      postcode: formData.get("postcode") ? (formData.get("postcode") as string) : undefined,
+      companyName: formData.get("companyName") ? (formData.get("companyName") as string) : undefined,
+      businessType: formData.get("businessType") ? (formData.get("businessType") as string) : undefined,
+      website: formData.get("website") ? (formData.get("website") as string) : undefined,
+      charityName: formData.get("charityName") ? (formData.get("charityName") as string) : undefined,
+      charityNumber: formData.get("charityNumber") ? (formData.get("charityNumber") as string) : undefined,
+      description: formData.get("description") ? (formData.get("description") as string) : undefined,
+      bio: formData.get("bio") ? (formData.get("bio") as string) : undefined,
+      interests: formData.get("interests") 
+        ? (formData.get("interests") as string).split(",").map(i => i.trim()).filter(i => i.length > 0)
+        : [],
       gdprConsent: formData.get("gdprConsent") === "on",
       marketingConsent: formData.get("marketingConsent") === "on",
     };
@@ -70,9 +78,15 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto max-w-2xl px-4">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold">
-            <div className="h-8 w-8 rounded-full bg-primary" />
-            Burton Latimer Community
+          <Link href="/" className="inline-flex flex-col items-center gap-2">
+            <Image
+              src="/logos/BL-Connect-Trans.png"
+              alt="Burton Latimer Connect Logo"
+              width={300}
+              height={300}
+              className="h-32 w-auto"
+              priority
+            />
           </Link>
         </div>
 
@@ -80,7 +94,7 @@ export default function RegisterPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Create Your Account</CardTitle>
             <CardDescription>
-              Join the Burton Latimer Community and connect with your neighbors
+              Join Burton Latimer Connect and connect with your neighbors
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -105,16 +119,64 @@ export default function RegisterPage() {
                 </Select>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name *</Label>
-                  <Input id="firstName" name="firstName" required />
+              {accountType === "INDIVIDUAL" && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name *</Label>
+                    <Input id="firstName" name="firstName" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Input id="lastName" name="lastName" required />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name *</Label>
-                  <Input id="lastName" name="lastName" required />
-                </div>
-              </div>
+              )}
+
+              {accountType === "COMPANY" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">Company Name *</Label>
+                    <Input id="companyName" name="companyName" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="businessType">Business Type *</Label>
+                    <Input id="businessType" name="businessType" placeholder="e.g., Retail, Restaurant, Services" required />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">Contact First Name *</Label>
+                      <Input id="firstName" name="firstName" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Contact Last Name *</Label>
+                      <Input id="lastName" name="lastName" required />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {accountType === "CHARITY" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="charityName">Charity Name *</Label>
+                    <Input id="charityName" name="charityName" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="charityNumber">Charity Registration Number *</Label>
+                    <Input id="charityNumber" name="charityNumber" required />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">Contact First Name *</Label>
+                      <Input id="firstName" name="firstName" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Contact Last Name *</Label>
+                      <Input id="lastName" name="lastName" required />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address *</Label>
@@ -127,10 +189,19 @@ export default function RegisterPage() {
                 <p className="text-xs text-muted-foreground">Minimum 8 characters</p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <Input id="dateOfBirth" name="dateOfBirth" type="date" />
-              </div>
+              {accountType === "INDIVIDUAL" && (
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Input id="dateOfBirth" name="dateOfBirth" type="date" />
+                </div>
+              )}
+
+              {(accountType === "COMPANY" || accountType === "CHARITY") && (
+                <div className="space-y-2">
+                  <Label htmlFor="website">Website</Label>
+                  <Input id="website" name="website" type="url" placeholder="https://" />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber">Phone Number</Label>
@@ -153,28 +224,41 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {accountType === "COMPANY" && (
+              {accountType === "INDIVIDUAL" && (
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input id="companyName" name="companyName" />
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    name="bio"
+                    placeholder="Tell us about yourself..."
+                    rows={3}
+                  />
                 </div>
               )}
 
-              {accountType === "CHARITY" && (
+              {(accountType === "COMPANY" || accountType === "CHARITY") && (
                 <div className="space-y-2">
-                  <Label htmlFor="charityNumber">Charity Registration Number</Label>
-                  <Input id="charityNumber" name="charityNumber" />
+                  <Label htmlFor="description">{accountType === "COMPANY" ? "Company Description" : "Charity Description"} *</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    placeholder={accountType === "COMPANY" ? "Describe your business, products, and services..." : "Describe your charity's mission and activities..."}
+                    rows={4}
+                    required
+                  />
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  name="bio"
-                  placeholder="Tell us about yourself..."
-                  rows={3}
+                <Label htmlFor="interests">Interests (Optional)</Label>
+                <Input
+                  id="interests"
+                  name="interests"
+                  placeholder="e.g., Gardening, Cooking, Sports (comma-separated)"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Help us connect you with people who share your interests
+                </p>
               </div>
 
               <div className="space-y-4 border-t pt-4">

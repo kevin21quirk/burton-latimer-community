@@ -1,19 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Send } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ArrowLeft, Send, Plus, Search } from "lucide-react";
+import PlatformHeader from "@/components/shared/PlatformHeader";
 
 type User = {
   id: string;
+  email: string;
   firstName: string;
   lastName: string;
+  accountType: string;
   profileImage: string | null;
+  companyName?: string | null;
+  charityName?: string | null;
 };
 
 type Message = {
@@ -36,10 +52,84 @@ export default function MessagesClient({
   conversations: Message[];
   users: (User & { accountType: string })[];
 }) {
+  const searchParams = useSearchParams();
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>(conversations);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showComposeDialog, setShowComposeDialog] = useState(false);
+  const [composeRecipient, setComposeRecipient] = useState<string>("");
+  const [composeMessage, setComposeMessage] = useState("");
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [conversationSearchQuery, setConversationSearchQuery] = useState("");
+  const [mounted, setMounted] = useState(false);
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const userId = searchParams.get('userId');
+    if (userId) {
+      setSelectedUser(userId);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (selectedUser) {
+      markMessagesAsRead(selectedUser);
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!conversationSearchQuery || conversationSearchQuery.trim().length === 0) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const response = await fetch(
+          `/api/users/search?q=${encodeURIComponent(conversationSearchQuery)}`
+        );
+        if (response.ok) {
+          const results = await response.json();
+          setSearchResults(results);
+        }
+      } catch (error) {
+        console.error("Search error:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(searchUsers, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [conversationSearchQuery]);
+
+  const markMessagesAsRead = async (senderId: string) => {
+    try {
+      await fetch('/api/messages/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senderId }),
+      });
+      
+      // Update local state to mark messages as read
+      setMessages(messages.map(msg => 
+        msg.senderId === senderId && msg.receiverId === user.id
+          ? { ...msg, read: true }
+          : msg
+      ));
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  };
 
   const conversationUsers = Array.from(
     new Map(
@@ -50,6 +140,11 @@ export default function MessagesClient({
     ).values()
   );
 
+  // Show search results if searching, otherwise show existing conversations
+  const displayUsers = conversationSearchQuery.length >= 1 
+    ? searchResults 
+    : conversationUsers;
+
   const selectedMessages = selectedUser
     ? messages.filter(
         (msg) =>
@@ -57,6 +152,46 @@ export default function MessagesClient({
           (msg.senderId === selectedUser && msg.receiverId === user.id)
       )
     : [];
+
+  const filteredUsers = users.filter((u) => {
+    const searchLower = userSearchQuery.toLowerCase();
+    return (
+      u.firstName.toLowerCase().includes(searchLower) ||
+      u.lastName.toLowerCase().includes(searchLower) ||
+      u.email.toLowerCase().includes(searchLower) ||
+      u.accountType.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const handleComposeMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!composeMessage.trim() || !composeRecipient) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiverId: composeRecipient,
+          content: composeMessage,
+        }),
+      });
+
+      if (response.ok) {
+        const newMsg = await response.json();
+        setMessages([...messages, newMsg]);
+        setComposeMessage("");
+        setComposeRecipient("");
+        setShowComposeDialog(false);
+        setSelectedUser(composeRecipient);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,87 +221,217 @@ export default function MessagesClient({
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border bg-white">
-        <div className="container mx-auto flex h-16 items-center gap-4 px-4">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-primary" />
-            <span className="text-xl font-bold">Messages</span>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-100">
+      <PlatformHeader user={user} currentPage="messages" />
 
       <div className="container mx-auto px-4 py-6">
+        <div className="mb-4">
+          <Link href="/dashboard">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </Link>
+        </div>
         <div className="grid gap-6 lg:grid-cols-12">
           <Card className="lg:col-span-4">
-            <CardHeader>
-              <CardTitle>Conversations</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle>Messages</CardTitle>
+              {mounted && <Dialog open={showComposeDialog} onOpenChange={setShowComposeDialog}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    New Message
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Compose New Message</DialogTitle>
+                    <DialogDescription>
+                      Select a recipient and write your message
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleComposeMessage} className="space-y-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium">Search Users:</label>
+                      <Input
+                        placeholder="Search by name, email, or account type..."
+                        value={userSearchQuery}
+                        onChange={(e) => setUserSearchQuery(e.target.value)}
+                        className="mb-3"
+                      />
+                      <label className="mb-2 block text-sm font-medium">Select Recipient:</label>
+                      <ScrollArea className="h-[200px] rounded-md border">
+                        <div className="p-2 space-y-1">
+                          {filteredUsers.length > 0 ? (
+                            filteredUsers.map((u) => (
+                              <button
+                                key={u.id}
+                                type="button"
+                                onClick={() => {
+                                  setComposeRecipient(u.id);
+                                  setUserSearchQuery("");
+                                }}
+                                className={`w-full rounded-lg p-3 text-left transition-colors hover:bg-muted ${
+                                  composeRecipient === u.id ? "bg-muted border-2 border-primary" : ""
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="bg-accent text-accent-foreground text-xs">
+                                      {u.firstName[0]}{u.lastName[0]}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm">
+                                      {u.firstName} {u.lastName}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {u.accountType} • {u.email}
+                                    </p>
+                                  </div>
+                                </div>
+                              </button>
+                            ))
+                          ) : (
+                            <p className="py-4 text-center text-sm text-muted-foreground">
+                              No users found
+                            </p>
+                          )}
+                        </div>
+                      </ScrollArea>
+                      {composeRecipient && (
+                        <p className="mt-2 text-sm text-green-600">
+                          ✓ Selected: {filteredUsers.find(u => u.id === composeRecipient)?.firstName} {filteredUsers.find(u => u.id === composeRecipient)?.lastName}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium">Message:</label>
+                      <Textarea
+                        value={composeMessage}
+                        onChange={(e) => setComposeMessage(e.target.value)}
+                        placeholder="Type your message..."
+                        rows={5}
+                        required
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowComposeDialog(false);
+                          setComposeMessage("");
+                          setComposeRecipient("");
+                          setUserSearchQuery("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={loading}>
+                        {loading ? "Sending..." : "Send Message"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>}
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-2">
-                  {conversationUsers.map((convUser) => (
-                    <button
-                      key={convUser.id}
-                      onClick={() => setSelectedUser(convUser.id)}
-                      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted ${
-                        selectedUser === convUser.id ? "bg-muted" : ""
-                      }`}
-                    >
-                      <Avatar>
-                        <AvatarFallback className="bg-accent text-accent-foreground">
-                          {convUser.firstName[0]}
-                          {convUser.lastName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="font-medium">
-                          {convUser.firstName} {convUser.lastName}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Click to view messages
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                  {conversationUsers.length === 0 && (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                      No conversations yet. Start a new conversation below.
-                    </p>
-                  )}
-                </div>
-              </ScrollArea>
-
-              <div className="mt-4 border-t pt-4">
-                <p className="mb-2 text-sm font-medium">Start New Conversation</p>
-                <div className="space-y-2">
-                  {users.slice(0, 5).map((u) => (
-                    <button
-                      key={u.id}
-                      onClick={() => setSelectedUser(u.id)}
-                      className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-muted"
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-accent text-xs text-accent-foreground">
-                          {u.firstName[0]}
-                          {u.lastName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">
-                          {u.firstName} {u.lastName}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{u.accountType}</p>
-                      </div>
-                    </button>
-                  ))}
+              {/* Search Conversations */}
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search People, Businesses, Charities"
+                    value={conversationSearchQuery}
+                    onChange={(e) => setConversationSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
                 </div>
               </div>
+              {/* Search Results or Existing Conversations */}
+              {conversationSearchQuery.length >= 1 ? (
+                <ScrollArea className="h-[550px]">
+                  <div className="space-y-2">
+                    {isSearching ? (
+                      <p className="py-8 text-center text-sm text-muted-foreground">
+                        Searching...
+                      </p>
+                    ) : displayUsers.length > 0 ? (
+                      displayUsers.map((foundUser) => (
+                        <button
+                          key={foundUser.id}
+                          onClick={() => {
+                            setSelectedUser(foundUser.id);
+                            setConversationSearchQuery("");
+                          }}
+                          className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted ${
+                            selectedUser === foundUser.id ? "bg-muted" : ""
+                          }`}
+                        >
+                          <Avatar>
+                            <AvatarFallback className="bg-accent text-accent-foreground">
+                              {foundUser.firstName[0]}
+                              {foundUser.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              {foundUser.firstName} {foundUser.lastName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {foundUser.accountType === "COMPANY" && foundUser.companyName
+                                ? foundUser.companyName
+                                : foundUser.accountType === "CHARITY" && foundUser.charityName
+                                ? foundUser.charityName
+                                : foundUser.accountType}
+                            </p>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="py-8 text-center text-sm text-muted-foreground">
+                        No people, businesses, or charities found
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              ) : conversationUsers.length > 0 ? (
+                <ScrollArea className="h-[550px]">
+                  <div className="space-y-2">
+                    {conversationUsers.map((convUser) => (
+                      <button
+                        key={convUser.id}
+                        onClick={() => setSelectedUser(convUser.id)}
+                        className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted ${
+                          selectedUser === convUser.id ? "bg-muted" : ""
+                        }`}
+                      >
+                        <Avatar>
+                          <AvatarFallback className="bg-accent text-accent-foreground">
+                            {convUser.firstName[0]}
+                            {convUser.lastName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {convUser.firstName} {convUser.lastName}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Click to view messages
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              ) : (
+                <div className="py-12 text-center text-muted-foreground">
+                  <p className="mb-2">No conversations yet</p>
+                  <p className="text-sm">Search for people to start chatting</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -10,6 +10,7 @@ export async function POST(
     const session = await requireAuth();
     const { groupId } = await params;
 
+    // Check if already a member
     const existingMember = await prisma.groupMember.findUnique({
       where: {
         userId_groupId: {
@@ -26,15 +27,42 @@ export async function POST(
       );
     }
 
-    await prisma.groupMember.create({
-      data: {
-        userId: session.userId,
-        groupId: groupId,
-        role: "member",
+    // Check if already has a pending request
+    const existingRequest = await prisma.groupJoinRequest.findUnique({
+      where: {
+        userId_groupId: {
+          userId: session.userId,
+          groupId: groupId,
+        },
       },
     });
 
-    return NextResponse.json({ message: "Joined group successfully" });
+    if (existingRequest) {
+      if (existingRequest.status === "PENDING") {
+        return NextResponse.json(
+          { message: "Join request already pending" },
+          { status: 400 }
+        );
+      } else if (existingRequest.status === "REJECTED") {
+        return NextResponse.json(
+          { message: "Your join request was rejected" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Create join request (requires group admin approval)
+    await prisma.groupJoinRequest.create({
+      data: {
+        userId: session.userId,
+        groupId: groupId,
+        status: "PENDING",
+      },
+    });
+
+    return NextResponse.json({ 
+      message: "Join request sent! Waiting for group admin approval." 
+    });
   } catch (error) {
     console.error("Join group error:", error);
     return NextResponse.json(

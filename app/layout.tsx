@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Burton Latimer Community - Connecting Our Town",
-  description: "A social platform for Burton Latimer bringing together individuals, charities, and businesses to support and connect with our local community.",
+  title: "Burton Latimer Connect - Connecting Our Town",
+  description: "Burton Latimer Connect - A social platform bringing together individuals, charities, and businesses to support and connect with our local community.",
 };
 
 export default function RootLayout({

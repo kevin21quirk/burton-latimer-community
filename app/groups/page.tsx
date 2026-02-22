@@ -21,7 +21,17 @@ export default async function GroupsPage() {
   });
 
   const groups = await prisma.group.findMany({
+    where: {
+      status: "APPROVED",
+    },
     include: {
+      creator: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
       members: {
         select: {
           userId: true,
@@ -54,9 +64,23 @@ export default async function GroupsPage() {
     },
   });
 
+  // Get groups created by the user (including pending ones)
+  const createdGroups = await prisma.group.findMany({
+    where: { creatorId: session.userId },
+    include: {
+      _count: {
+        select: {
+          members: true,
+          posts: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
   if (!user) {
     redirect("/login");
   }
 
-  return <GroupsClient user={user} groups={groups} userGroups={userGroups} />;
+  return <GroupsClient user={user} groups={groups} userGroups={userGroups} createdGroups={createdGroups} />;
 }

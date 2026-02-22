@@ -7,6 +7,8 @@ const createPostSchema = z.object({
   content: z.string().min(1),
   postType: z.enum(["GENERAL", "HELP_REQUEST", "BUSINESS_AD", "EVENT"]).default("GENERAL"),
   images: z.array(z.string()).optional(),
+  video: z.string().nullable().optional(),
+  groupId: z.string().nullable().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -20,7 +22,9 @@ export async function POST(request: NextRequest) {
         content: data.content,
         postType: data.postType,
         images: data.images || [],
+        video: data.video || null,
         userId: session.userId,
+        groupId: data.groupId || null,
       },
       include: {
         user: {

@@ -28,6 +28,7 @@ export default async function ProfilePage() {
       bio: true,
       profileImage: true,
       coverImage: true,
+      interests: true,
       marketingConsent: true,
       createdAt: true,
     },

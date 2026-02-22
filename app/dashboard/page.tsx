@@ -23,7 +23,21 @@ export default async function DashboardPage() {
     },
   });
 
+  // Get user's group memberships
+  const userGroupIds = await prisma.groupMember.findMany({
+    where: { userId: session.userId },
+    select: { groupId: true },
+  });
+
+  const memberGroupIds = userGroupIds.map(g => g.groupId);
+
   const posts = await prisma.post.findMany({
+    where: {
+      OR: [
+        { groupId: null }, // Public posts
+        { groupId: { in: memberGroupIds } }, // Posts in groups user is a member of
+      ],
+    },
     take: 20,
     orderBy: { createdAt: "desc" },
     include: {
@@ -50,9 +64,53 @@ export default async function DashboardPage() {
     },
   });
 
+  // Get groups created by user with pending join requests
+  const userGroups = await prisma.group.findMany({
+    where: {
+      creatorId: session.userId,
+      status: "APPROVED",
+    },
+    select: {
+      id: true,
+      name: true,
+      _count: {
+        select: {
+          joinRequests: {
+            where: {
+              status: "PENDING",
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Get pending connection requests for the user
+  const pendingConnectionRequests = await prisma.connection.findMany({
+    where: {
+      addresseeId: session.userId,
+      status: "PENDING",
+    },
+    include: {
+      requester: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          accountType: true,
+        },
+      },
+    },
+  });
+
   if (!user) {
     redirect("/login");
   }
 
-  return <DashboardClient user={user} initialPosts={posts} />;
+  return <DashboardClient 
+    user={user} 
+    initialPosts={posts} 
+    userGroups={userGroups}
+    pendingConnectionRequests={pendingConnectionRequests}
+  />;
 }

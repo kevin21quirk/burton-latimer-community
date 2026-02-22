@@ -48,19 +48,40 @@ export default async function MessagesPage() {
     },
   });
 
-  const users = await prisma.user.findMany({
+  // Get only connected users (accepted connections)
+  const connections = await prisma.connection.findMany({
     where: {
-      NOT: { id: session.userId },
+      OR: [
+        { requesterId: session.userId, status: "ACCEPTED" },
+        { addresseeId: session.userId, status: "ACCEPTED" },
+      ],
     },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      profileImage: true,
-      accountType: true,
+    include: {
+      requester: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          profileImage: true,
+          accountType: true,
+        },
+      },
+      addressee: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          profileImage: true,
+          accountType: true,
+        },
+      },
     },
-    take: 20,
   });
+
+  // Extract connected users (the other person in each connection)
+  const users = connections.map(conn => 
+    conn.requesterId === session.userId ? conn.addressee : conn.requester
+  );
 
   if (!user) {
     redirect("/login");
