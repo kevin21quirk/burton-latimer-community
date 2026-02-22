@@ -9,6 +9,8 @@ const createPostSchema = z.object({
   images: z.array(z.string()).optional(),
   video: z.string().nullable().optional(),
   groupId: z.string().nullable().optional(),
+  riskScore: z.number().optional(),
+  isFlagged: z.boolean().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -25,6 +27,9 @@ export async function POST(request: NextRequest) {
         video: data.video || null,
         userId: session.userId,
         groupId: data.groupId || null,
+        riskScore: data.riskScore || 0,
+        isFlagged: data.isFlagged || false,
+        flaggedAt: data.isFlagged ? new Date() : null,
       },
       include: {
         user: {
@@ -74,6 +79,9 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0");
 
     const posts = await prisma.post.findMany({
+      where: {
+        isHidden: false,
+      },
       take: limit,
       skip: offset,
       orderBy: { createdAt: "desc" },

@@ -33,9 +33,14 @@ export default async function DashboardPage() {
 
   const posts = await prisma.post.findMany({
     where: {
-      OR: [
-        { groupId: null }, // Public posts
-        { groupId: { in: memberGroupIds } }, // Posts in groups user is a member of
+      AND: [
+        {
+          OR: [
+            { groupId: null }, // Public posts
+            { groupId: { in: memberGroupIds } }, // Posts in groups user is a member of
+          ],
+        },
+        { isHidden: false }, // Filter out hidden posts
       ],
     },
     take: 20,

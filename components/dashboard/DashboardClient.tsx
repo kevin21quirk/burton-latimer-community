@@ -33,12 +33,15 @@ import {
   Bell,
   User,
   Shield,
-  AlertCircle
+  AlertCircle,
+  Flag,
+  MoreVertical
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PlatformHeader from "@/components/shared/PlatformHeader";
 import SafeSpaceSection from "@/components/dashboard/SafeSpaceSection";
+import ReportPostDialog from "@/components/moderation/ReportPostDialog";
 
 type User = {
   id: string;
@@ -126,6 +129,10 @@ export default function DashboardClient({
   const [processingRequest, setProcessingRequest] = useState<string | null>(null);
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
   const [creatingGroup, setCreatingGroup] = useState(false);
+  const [reportingPostId, setReportingPostId] = useState<string | null>(null);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [safetyWarning, setSafetyWarning] = useState<string | null>(null);
+  const [moderationError, setModerationError] = useState<string | null>(null);
 
   // Show notification dialog on first load if there are pending requests
   useEffect(() => {
@@ -336,7 +343,37 @@ export default function DashboardClient({
     if (!newPostContent.trim()) return;
 
     setLoading(true);
+    setModerationError(null);
+    
     try {
+      // Check content moderation first
+      const moderationCheck = await fetch("/api/posts/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: newPostContent,
+          images: selectedImages.length,
+        }),
+      });
+
+      const moderationResult = await moderationCheck.json();
+
+      if (moderationResult.blocked) {
+        setModerationError(moderationResult.reason || "Your post contains content that violates our community guidelines. Please review and modify your post.");
+        setLoading(false);
+        return;
+      }
+
+      if (moderationResult.needsReview) {
+        const confirmPost = confirm(
+          "Your post has been flagged for review due to potentially sensitive content. It will be reviewed by our moderation team before being published. Do you want to continue?"
+        );
+        if (!confirmPost) {
+          setLoading(false);
+          return;
+        }
+      }
+
       // Convert images to base64 for now (in production, use proper file upload)
       const imageUrls: string[] = [];
       for (const image of selectedImages) {
@@ -356,6 +393,8 @@ export default function DashboardClient({
           postType,
           images: imageUrls,
           groupId: selectedGroup === "public" ? null : selectedGroup,
+          riskScore: moderationResult.riskScore || 0,
+          isFlagged: moderationResult.needsReview || false,
         }),
       });
 
@@ -366,11 +405,14 @@ export default function DashboardClient({
         setPostType("GENERAL");
         setSelectedImages([]);
         setSelectedGroup("public");
+        setSafetyWarning(null);
       } else {
-        alert("Failed to create post");
+        const errorData = await response.json();
+        setModerationError(errorData.error || "Failed to create post");
       }
     } catch (error) {
       console.error("Error creating post:", error);
+      setModerationError("An error occurred while creating your post. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -785,6 +827,25 @@ export default function DashboardClient({
               </CardHeader>
               <CardContent className="pt-0">
                 <form onSubmit={handleCreatePost} className="space-y-3">
+                  {moderationError && (
+                    <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">Content Blocked</p>
+                          <p>{moderationError}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {safetyWarning && (
+                    <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-900">
+                      <div className="flex items-start gap-2">
+                        <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                        <p>{safetyWarning}</p>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarFallback className="bg-accent text-white">
@@ -794,7 +855,10 @@ export default function DashboardClient({
                     <Textarea
                       placeholder={`What's on your mind, ${user.firstName}?`}
                       value={newPostContent}
-                      onChange={(e) => setNewPostContent(e.target.value)}
+                      onChange={(e) => {
+                        setNewPostContent(e.target.value);
+                        setModerationError(null);
+                      }}
                       rows={3}
                       className="flex-1 resize-none"
                     />
@@ -977,6 +1041,18 @@ export default function DashboardClient({
                       <Share2 className="mr-1 h-4 w-4" />
                       Share
                     </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => {
+                        setReportingPostId(post.id);
+                        setShowReportDialog(true);
+                      }}
+                      className="ml-auto text-muted-foreground hover:text-red-600"
+                    >
+                      <Flag className="mr-1 h-4 w-4" />
+                      Report
+                    </Button>
                   </div>
 
                   {/* Comments Section */}
@@ -1061,6 +1137,19 @@ export default function DashboardClient({
         </aside>
         </div>
       </div>
+
+      {/* Report Post Dialog */}
+      {reportingPostId && (
+        <ReportPostDialog
+          postId={reportingPostId}
+          open={showReportDialog}
+          onOpenChange={setShowReportDialog}
+          onReported={() => {
+            setReportingPostId(null);
+            router.refresh();
+          }}
+        />
+      )}
     </div>
   );
 }
