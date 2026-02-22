@@ -944,9 +944,6 @@ export default function DashboardClient({
               </CardContent>
             </Card>
 
-            {/* Safe Space Section */}
-            <SafeSpaceSection userId={user.id} />
-
           <div className="space-y-4">
             {posts.map((post) => (
               <Card key={post.id}>
@@ -1116,7 +1113,7 @@ export default function DashboardClient({
           </div>
         </main>
 
-        <aside className="lg:col-span-3">
+        <aside className="lg:col-span-3 space-y-4">
           <Card>
             <CardHeader>
               <h3 className="font-semibold">Community Groups</h3>
@@ -1134,6 +1131,9 @@ export default function DashboardClient({
               </div>
             </CardContent>
           </Card>
+
+          {/* Safe Space Section */}
+          <SafeSpaceSection userId={user.id} />
         </aside>
         </div>
       </div>
