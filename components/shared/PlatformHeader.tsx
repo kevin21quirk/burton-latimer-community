@@ -459,18 +459,36 @@ export default function PlatformHeader({ user, currentPage = "dashboard" }: { us
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="h-10 w-10 cursor-pointer border-2 border-transparent hover:border-gray-300">
-                <AvatarFallback className="bg-accent text-sm font-semibold text-white">
-                  {user.firstName[0]}{user.lastName[0]}
-                </AvatarFallback>
+                {user.profileImage ? (
+                  <Image
+                    src={user.profileImage}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <AvatarFallback className="bg-accent text-sm font-semibold text-white">
+                    {user.firstName[0]}{user.lastName[0]}
+                  </AvatarFallback>
+                )}
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-accent text-white">
-                      {user.firstName[0]}{user.lastName[0]}
-                    </AvatarFallback>
+                    {user.profileImage ? (
+                      <Image
+                        src={user.profileImage}
+                        alt={`${user.firstName} ${user.lastName}`}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <AvatarFallback className="bg-accent text-white">
+                        {user.firstName[0]}{user.lastName[0]}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                   <div>
                     <p className="font-semibold">{user.firstName} {user.lastName}</p>
