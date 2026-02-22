@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+export const dynamic = 'force-dynamic';
+
 export default function RegisterPage() {
   const router = useRouter();
   const [accountType, setAccountType] = useState<string>("INDIVIDUAL");
