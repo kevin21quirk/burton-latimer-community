@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Upload, X } from "lucide-react";
 import PlatformHeader from "@/components/shared/PlatformHeader";
 
 type User = {
@@ -38,6 +38,67 @@ export default function ProfileClient({ user }: { user: User }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [profileImage, setProfileImage] = useState<string | null>(user.profileImage);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(user.profileImage);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image must be less than 5MB");
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+  };
+
+  const handleUploadImage = async () => {
+    if (!selectedFile) return;
+
+    setUploadingImage(true);
+    setError("");
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result as string;
+        
+        const response = await fetch("/api/profile/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: base64Image }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload image");
+        }
+
+        const data = await response.json();
+        setProfileImage(data.profileImage);
+        setImagePreview(data.profileImage);
+        setSelectedFile(null);
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      };
+      reader.readAsDataURL(selectedFile);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload image");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -135,6 +196,74 @@ export default function ProfileClient({ user }: { user: User }) {
                       {error}
                     </div>
                   )}
+
+                  {/* Profile Image Upload Section */}
+                  <div className="space-y-4">
+                    <Label>Profile Image</Label>
+                    <div className="flex items-center gap-6">
+                      <div className="relative">
+                        {imagePreview ? (
+                          <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-gray-200">
+                            <Image
+                              src={imagePreview}
+                              alt="Profile preview"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <Avatar className="h-32 w-32">
+                            <AvatarFallback className="bg-accent text-4xl text-accent-foreground">
+                              {user.firstName[0]}
+                              {user.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => document.getElementById('profile-image-upload')?.click()}
+                            disabled={uploadingImage}
+                          >
+                            <Upload className="mr-2 h-4 w-4" />
+                            Choose Image
+                          </Button>
+                          {selectedFile && (
+                            <>
+                              <Button
+                                type="button"
+                                onClick={handleUploadImage}
+                                disabled={uploadingImage}
+                              >
+                                {uploadingImage ? "Uploading..." : "Upload"}
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={handleRemoveImage}
+                                disabled={uploadingImage}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                        <input
+                          id="profile-image-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageSelect}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Upload a profile photo. Max size: 5MB. Recommended: Square image, at least 400x400px.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
