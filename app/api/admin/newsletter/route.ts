@@ -3,9 +3,52 @@ import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
+export async function GET(request: NextRequest) {
+  try {
+    const session = await requireAuth();
+
+    // Check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { isAdmin: true },
+    });
+
+    if (!user?.isAdmin) {
+      return NextResponse.json(
+        { error: "Unauthorized - Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    // Get all newsletters ordered by most recent first
+    const newsletters = await prisma.newsletter.findMany({
+      orderBy: { sentAt: "desc" },
+      include: {
+        sentBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ newsletters });
+  } catch (error) {
+    console.error("Newsletter fetch error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch newsletters" },
+      { status: 500 }
+    );
+  }
+}
+
 const newsletterSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
   content: z.string().min(1, "Content is required"),
+  htmlContent: z.string().optional(),
+  images: z.array(z.string()).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -26,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { subject, content } = newsletterSchema.parse(body);
+    const { subject, content, htmlContent, images } = newsletterSchema.parse(body);
 
     // Get all users who opted in for marketing communications
     const subscribers = await prisma.user.findMany({
@@ -60,13 +103,26 @@ export async function POST(request: NextRequest) {
     //     email: s.email,
     //     name: `${s.firstName} ${s.lastName}`,
     //   })),
-    //   html: content,
+    //   html: htmlContent || content,
     // });
+
+    // Save newsletter to database
+    const newsletter = await prisma.newsletter.create({
+      data: {
+        subject,
+        content,
+        htmlContent: htmlContent || null,
+        images: images || [],
+        subscriberCount: subscribers.length,
+        sentById: session.userId,
+      },
+    });
 
     return NextResponse.json({
       success: true,
       message: `Newsletter sent to ${subscribers.length} subscribers`,
       subscriberCount: subscribers.length,
+      newsletterId: newsletter.id,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
