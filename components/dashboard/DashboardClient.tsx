@@ -821,11 +821,11 @@ export default function DashboardClient({
           {/* Main Feed */}
           <main className="lg:col-span-6 col-span-full">
             {/* Create Post Box */}
-            <Card className="mb-4 shadow-sm">
-              <CardHeader className="pb-3">
-                <h2 className="text-lg font-semibold">Create a Post</h2>
+            <Card className="mb-2 sm:mb-4 shadow-sm">
+              <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+                <h2 className="text-base sm:text-lg font-semibold">Create a Post</h2>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
                 <form onSubmit={handleCreatePost} className="space-y-3">
                   {moderationError && (
                     <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800">
@@ -1113,7 +1113,7 @@ export default function DashboardClient({
           </div>
         </main>
 
-        <aside className="lg:col-span-3 space-y-4">
+        <aside className="hidden md:block lg:col-span-3 space-y-4">
           <Card>
             <CardHeader>
               <h3 className="font-semibold">Community Groups</h3>
