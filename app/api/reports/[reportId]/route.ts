@@ -42,7 +42,7 @@ export async function PATCH(
     const report = await prisma.report.update({
       where: { id: reportId },
       data: {
-        status: action === "approve" ? "APPROVED" : "DENIED",
+        status: action === "approve" ? "RESOLVED" : "DISMISSED",
         reviewedBy: userId,
         reviewedAt: new Date(),
       },
