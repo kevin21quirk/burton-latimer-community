@@ -665,7 +665,6 @@ export default function DashboardClient({
           </div>
         </DialogContent>
       </Dialog>
-      <PlatformHeader user={user} />
 
       {/* Connection Requests Dialog - shows on login if there are pending requests */}
       <ConnectionRequestsDialog />
