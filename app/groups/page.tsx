@@ -55,6 +55,12 @@ export default async function GroupsPage() {
     include: {
       group: {
         include: {
+          members: {
+            select: {
+              userId: true,
+              role: true,
+            },
+          },
           _count: {
             select: {
               members: true,

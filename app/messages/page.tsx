@@ -14,8 +14,10 @@ export default async function MessagesPage() {
     where: { id: session.userId },
     select: {
       id: true,
+      email: true,
       firstName: true,
       lastName: true,
+      accountType: true,
       profileImage: true,
     },
   });
@@ -32,16 +34,20 @@ export default async function MessagesPage() {
       sender: {
         select: {
           id: true,
+          email: true,
           firstName: true,
           lastName: true,
+          accountType: true,
           profileImage: true,
         },
       },
       receiver: {
         select: {
           id: true,
+          email: true,
           firstName: true,
           lastName: true,
+          accountType: true,
           profileImage: true,
         },
       },
@@ -60,6 +66,7 @@ export default async function MessagesPage() {
       requester: {
         select: {
           id: true,
+          email: true,
           firstName: true,
           lastName: true,
           profileImage: true,
@@ -69,6 +76,7 @@ export default async function MessagesPage() {
       addressee: {
         select: {
           id: true,
+          email: true,
           firstName: true,
           lastName: true,
           profileImage: true,

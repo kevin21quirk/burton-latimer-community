@@ -93,7 +93,17 @@ export default async function AdminPage() {
 
   const allGroups = await prisma.group.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      image: true,
+      isPrivate: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      creatorId: true,
+      interests: true,
       creator: {
         select: {
           id: true,

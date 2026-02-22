@@ -67,8 +67,10 @@ export default async function GroupManagePage({ params }: { params: Promise<{ gr
     where: { id: session.userId },
     select: {
       id: true,
+      email: true,
       firstName: true,
       lastName: true,
+      accountType: true,
       profileImage: true,
     },
   });

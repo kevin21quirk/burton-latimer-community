@@ -73,8 +73,19 @@ type Group = {
   id: string;
   name: string;
   description: string | null;
+  image: string | null;
   isPrivate: boolean;
+  status: string;
   createdAt: Date;
+  updatedAt: Date;
+  creatorId: string;
+  interests: string[];
+  creator: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   _count: {
     members: number;
     posts: number;
