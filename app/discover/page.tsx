@@ -20,6 +20,8 @@ export default async function DiscoverPage() {
       accountType: true,
       profileImage: true,
       interests: true,
+      companyName: true,
+      charityName: true,
     },
   });
 
