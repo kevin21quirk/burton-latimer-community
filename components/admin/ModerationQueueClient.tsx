@@ -189,7 +189,6 @@ export default function ModerationQueueClient({
           lastName: user.lastName,
           accountType: "INDIVIDUAL",
           profileImage: null,
-          bio: null,
         }} 
         currentPage="admin" 
       />
