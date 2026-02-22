@@ -97,6 +97,7 @@ model Post {
 
   comments Comment[]
   likes    Like[]
+  reports  Report[]
 
   groupId String?
   group   Group?  @relation(fields: [groupId], references: [id])
@@ -290,8 +291,8 @@ model Connection {
 
 enum ReportStatus {
   PENDING
-  APPROVED
-  DENIED
+  RESOLVED
+  DISMISSED
 }
 
 enum ReportReason {
@@ -306,6 +307,7 @@ model Report {
   id          String       @id @default(cuid())
   reason      ReportReason
   description String?
+  details     String?
   status      ReportStatus @default(PENDING)
 
   reporterId String
@@ -313,6 +315,9 @@ model Report {
 
   reportedId String
   reported   User   @relation("ReportsReceived", fields: [reportedId], references: [id], onDelete: Cascade)
+
+  postId     String?
+  post       Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   reviewedBy String?
   reviewer   User?   @relation("ReportsReviewed", fields: [reviewedBy], references: [id], onDelete: SetNull)
@@ -322,6 +327,7 @@ model Report {
 
   @@index([reporterId])
   @@index([reportedId])
+  @@index([postId])
   @@index([status])
 }
 
