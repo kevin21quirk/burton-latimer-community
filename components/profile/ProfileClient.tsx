@@ -10,6 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { ArrowLeft, Save, Upload, X } from "lucide-react";
 import PlatformHeader from "@/components/shared/PlatformHeader";
 
@@ -42,6 +50,9 @@ export default function ProfileClient({ user }: { user: User }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(user.profileImage);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(user.marketingConsent);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -100,6 +111,58 @@ export default function ProfileClient({ user }: { user: User }) {
     }
   };
 
+  const handleMarketingConsentChange = async (checked: boolean) => {
+    setMarketingConsent(checked);
+    
+    if (checked) {
+      try {
+        await fetch("/api/profile/email-signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: user.email, name: `${user.firstName} ${user.lastName}` }),
+        });
+      } catch (err) {
+        console.error("Failed to sign up for email notifications:", err);
+      }
+    }
+  };
+
+  const handleDownloadData = async () => {
+    try {
+      const response = await fetch("/api/profile/download-data");
+      if (!response.ok) throw new Error("Failed to download data");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `burton-latimer-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError("Failed to download data. Please try again.");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const response = await fetch("/api/profile/delete", {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) throw new Error("Failed to delete account");
+      
+      window.location.href = "/";
+    } catch (err) {
+      setError("Failed to delete account. Please try again.");
+      setDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -120,7 +183,7 @@ export default function ProfileClient({ user }: { user: User }) {
       interests: formData.get("interests") 
         ? (formData.get("interests") as string).split(",").map(i => i.trim()).filter(i => i.length > 0)
         : [],
-      marketingConsent: formData.get("marketingConsent") === "on",
+      marketingConsent: marketingConsent,
     };
 
     try {
@@ -163,7 +226,7 @@ export default function ProfileClient({ user }: { user: User }) {
                 </h2>
                 <p className="text-muted-foreground">{user.accountType}</p>
                 <p className="text-sm text-muted-foreground">
-                  Member since {new Date(user.createdAt).toLocaleDateString()}
+                  Member since {new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                 </p>
               </div>
             </div>
@@ -409,7 +472,8 @@ export default function ProfileClient({ user }: { user: User }) {
                       type="checkbox"
                       id="marketingConsent"
                       name="marketingConsent"
-                      defaultChecked={user.marketingConsent}
+                      checked={marketingConsent}
+                      onChange={(e) => handleMarketingConsentChange(e.target.checked)}
                       className="mt-1"
                     />
                     <Label htmlFor="marketingConsent" className="text-sm font-normal">
@@ -429,7 +493,7 @@ export default function ProfileClient({ user }: { user: User }) {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Member Since:</span>
                       <span className="font-medium">
-                        {new Date(user.createdAt).toLocaleDateString()}
+                        {new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -447,8 +511,8 @@ export default function ProfileClient({ user }: { user: User }) {
                     account.
                   </p>
                   <div className="flex gap-2">
-                    <Button variant="outline">Download My Data</Button>
-                    <Button variant="destructive">Delete Account</Button>
+                    <Button variant="outline" onClick={handleDownloadData}>Download My Data</Button>
+                    <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>Delete Account</Button>
                   </div>
                 </div>
               </CardContent>
@@ -456,6 +520,40 @@ export default function ProfileClient({ user }: { user: User }) {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Account</DialogTitle>
+            <DialogDescription>
+              Are you absolutely sure you want to delete your account?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              This action is <strong>permanent and irreversible</strong>. All your data, including:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+              <li>Your profile information</li>
+              <li>All your posts and comments</li>
+              <li>Your connections and messages</li>
+              <li>Your group memberships</li>
+            </ul>
+            <p className="text-sm text-muted-foreground">
+              will be <strong>permanently deleted</strong> and cannot be recovered.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting}>
+              {deleting ? "Deleting..." : "Yes, Delete My Account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
