@@ -340,7 +340,7 @@ export default function LocalServicesClient({
                           </Badge>
                         </div>
                         {service.isVerified && (
-                          <CheckCircle className="h-5 w-5 text-green-600" title="Verified" />
+                          <CheckCircle className="h-5 w-5 text-green-600" />
                         )}
                       </div>
                       <CardTitle className="text-lg">{service.name}</CardTitle>
@@ -414,7 +414,7 @@ export default function LocalServicesClient({
                             {getCategoryIcon(service.category)}
                           </div>
                           {service.isVerified && (
-                            <CheckCircle className="h-5 w-5 text-green-600" title="Verified" />
+                            <CheckCircle className="h-5 w-5 text-green-600" />
                           )}
                         </div>
                         <CardTitle className="text-lg">{service.name}</CardTitle>

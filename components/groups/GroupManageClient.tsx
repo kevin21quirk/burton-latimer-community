@@ -17,8 +17,10 @@ import PlatformHeader from "@/components/shared/PlatformHeader";
 
 type User = {
   id: string;
+  email: string;
   firstName: string;
   lastName: string;
+  accountType: string;
   profileImage: string | null;
 };
 
