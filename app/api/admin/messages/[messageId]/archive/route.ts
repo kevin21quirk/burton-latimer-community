@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { messageId: string } }
+  { params }: { params: Promise<{ messageId: string }> }
 ) {
   try {
     const session = await requireAuth();
@@ -22,7 +22,7 @@ export async function PATCH(
       );
     }
 
-    const { messageId } = params;
+    const { messageId } = await params;
 
     // Archive the message
     const message = await prisma.message.update({

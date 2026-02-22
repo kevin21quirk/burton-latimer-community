@@ -9,7 +9,7 @@ const JWT_SECRET = new TextEncoder().encode(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -22,6 +22,7 @@ export async function POST(
     const { payload } = await jwtVerify(token.value, JWT_SECRET);
     const userId = payload.userId as string;
 
+    const { postId } = await params;
     const { content } = await request.json();
 
     if (!content || !content.trim()) {
@@ -36,13 +37,13 @@ export async function POST(
       data: {
         content: content.trim(),
         userId,
-        postId: params.postId,
+        postId: postId,
       },
     });
 
     // Fetch the updated post with all relations
     const updatedPost = await prisma.post.findUnique({
-      where: { id: params.postId },
+      where: { id: postId },
       include: {
         user: {
           select: {
