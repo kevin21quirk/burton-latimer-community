@@ -362,9 +362,30 @@ export default function MessagesClient({
                       displayUsers.map((foundUser) => (
                         <button
                           key={foundUser.id}
-                          onClick={() => {
-                            setSelectedUser(foundUser.id);
-                            setConversationSearchQuery("");
+                          onClick={async () => {
+                            // Send connection request
+                            try {
+                              const response = await fetch('/api/connections', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ addresseeId: foundUser.id }),
+                              });
+                              
+                              if (response.ok) {
+                                alert(`Connection request sent to ${foundUser.firstName} ${foundUser.lastName}! They will be notified and can accept or decline your request.`);
+                                setConversationSearchQuery("");
+                              } else {
+                                const error = await response.json();
+                                if (error.error === "Connection already exists") {
+                                  alert(`You already have a connection request with ${foundUser.firstName} ${foundUser.lastName}.`);
+                                } else {
+                                  alert('Failed to send connection request. Please try again.');
+                                }
+                              }
+                            } catch (error) {
+                              console.error('Error sending connection request:', error);
+                              alert('Failed to send connection request. Please try again.');
+                            }
                           }}
                           className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted ${
                             selectedUser === foundUser.id ? "bg-muted" : ""

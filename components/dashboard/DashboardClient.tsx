@@ -42,6 +42,7 @@ import { Label } from "@/components/ui/label";
 import PlatformHeader from "@/components/shared/PlatformHeader";
 import SafeSpaceSection from "@/components/dashboard/SafeSpaceSection";
 import ReportPostDialog from "@/components/moderation/ReportPostDialog";
+import ConnectionRequestsDialog from "@/components/connections/ConnectionRequestsDialog";
 
 type User = {
   id: string;
@@ -664,8 +665,12 @@ export default function DashboardClient({
           </div>
         </DialogContent>
       </Dialog>
+      <PlatformHeader user={user} />
 
-      {/* Unread Messages Popup Dialog */}
+      {/* Connection Requests Dialog - shows on login if there are pending requests */}
+      <ConnectionRequestsDialog />
+
+      {/* Unread Messages Alert Dialog */}
       <Dialog open={showMessageAlert} onOpenChange={setShowMessageAlert}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
