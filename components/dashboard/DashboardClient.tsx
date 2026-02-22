@@ -38,6 +38,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PlatformHeader from "@/components/shared/PlatformHeader";
+import SafeSpaceSection from "@/components/dashboard/SafeSpaceSection";
 
 type User = {
   id: string;
@@ -878,6 +879,9 @@ export default function DashboardClient({
                 </form>
               </CardContent>
             </Card>
+
+            {/* Safe Space Section */}
+            <SafeSpaceSection userId={user.id} />
 
           <div className="space-y-4">
             {posts.map((post) => (

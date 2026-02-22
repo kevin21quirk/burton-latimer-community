@@ -101,9 +101,14 @@ model Post {
   groupId String?
   group   Group?  @relation(fields: [groupId], references: [id])
 
+  // Safe Space / Anonymous posting
+  isAnonymous            Boolean @default(false)
+  anonymousContactEmail  String?
+
   @@index([userId])
   @@index([createdAt])
   @@index([postType])
+  @@index([isAnonymous])
 }
 
 model Comment {
