@@ -954,17 +954,26 @@ export default function DashboardClient({
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex gap-3">
-                      <Avatar>
-                        <AvatarFallback className="bg-accent text-accent-foreground">
-                          {post.user.firstName[0]}{post.user.lastName[0]}
-                        </AvatarFallback>
+                      <Avatar className="h-10 w-10">
+                        {post.user.profileImage ? (
+                          <Image
+                            src={post.user.profileImage}
+                            alt={`${post.user.firstName} ${post.user.lastName}`}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <AvatarFallback className="bg-accent text-accent-foreground">
+                            {post.user.firstName[0]}{post.user.lastName[0]}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                       <div>
                         <p className="font-semibold">
                           {post.user.companyName || `${post.user.firstName} ${post.user.lastName}`}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}
+                          {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })} at {new Date(post.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                         </p>
                       </div>
                     </div>
