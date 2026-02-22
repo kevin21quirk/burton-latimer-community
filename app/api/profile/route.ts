@@ -6,13 +6,13 @@ import { z } from "zod";
 const updateProfileSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
-  phoneNumber: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  postcode: z.string().optional(),
-  companyName: z.string().optional(),
-  charityNumber: z.string().optional(),
-  bio: z.string().optional(),
+  phoneNumber: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  city: z.string().min(1).optional(),
+  postcode: z.string().nullable().optional(),
+  companyName: z.string().nullable().optional(),
+  charityNumber: z.string().nullable().optional(),
+  bio: z.string().nullable().optional(),
   interests: z.array(z.string()).optional(),
   marketingConsent: z.boolean().optional(),
 });
@@ -23,21 +23,23 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const data = updateProfileSchema.parse(body);
 
+    // Build update data object with only provided fields
+    const updateData: any = {};
+    if (data.firstName !== undefined) updateData.firstName = data.firstName;
+    if (data.lastName !== undefined) updateData.lastName = data.lastName;
+    if (data.phoneNumber !== undefined) updateData.phoneNumber = data.phoneNumber || null;
+    if (data.address !== undefined) updateData.address = data.address || null;
+    if (data.city !== undefined) updateData.city = data.city;
+    if (data.postcode !== undefined) updateData.postcode = data.postcode || null;
+    if (data.companyName !== undefined) updateData.companyName = data.companyName || null;
+    if (data.charityNumber !== undefined) updateData.charityNumber = data.charityNumber || null;
+    if (data.bio !== undefined) updateData.bio = data.bio || null;
+    if (data.interests !== undefined) updateData.interests = data.interests;
+    if (data.marketingConsent !== undefined) updateData.marketingConsent = data.marketingConsent;
+
     const user = await prisma.user.update({
       where: { id: session.userId },
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phoneNumber: data.phoneNumber,
-        address: data.address,
-        city: data.city,
-        postcode: data.postcode,
-        companyName: data.companyName,
-        charityNumber: data.charityNumber,
-        bio: data.bio,
-        interests: data.interests,
-        marketingConsent: data.marketingConsent,
-      },
+      data: updateData,
       select: {
         id: true,
         email: true,
