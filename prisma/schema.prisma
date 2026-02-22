@@ -105,10 +105,21 @@ model Post {
   isAnonymous            Boolean @default(false)
   anonymousContactEmail  String?
 
+  // Moderation
+  isFlagged              Boolean @default(false)
+  isHidden               Boolean @default(false)
+  moderationNotes        String?
+  flaggedAt              DateTime?
+  reviewedAt             DateTime?
+  reviewedBy             String?
+  riskScore              Int     @default(0)
+
   @@index([userId])
   @@index([createdAt])
   @@index([postType])
   @@index([isAnonymous])
+  @@index([isFlagged])
+  @@index([isHidden])
 }
 
 model Comment {
