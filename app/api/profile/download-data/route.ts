@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
             senderId: true,
           },
         },
-        groupMemberships: {
+        groupMembers: {
           select: {
             group: {
               select: {
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
         sent: user.sentMessages,
         received: user.receivedMessages,
       },
-      groups: user.groupMemberships,
+      groups: user.groupMembers,
       connections: {
         sent: user.connectionRequests,
         received: user.connectionReceived,
