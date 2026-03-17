@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Burton Latimer Connect - Connecting Our Town",
   description: "Burton Latimer Connect - A social platform bringing together individuals, charities, and businesses to support and connect with our local community.",
+  icons: {
+    apple: "/logos/BL-Connect-logo-appple-touch.png",
+  },
 };
 
 export default function RootLayout({
