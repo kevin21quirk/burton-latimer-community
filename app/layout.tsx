@@ -16,7 +16,13 @@ export const metadata: Metadata = {
   title: "Burton Latimer Connect - Connecting Our Town",
   description: "Burton Latimer Connect - A social platform bringing together individuals, charities, and businesses to support and connect with our local community.",
   icons: {
-    apple: "/logos/BL-Connect-logo-appple-touch.png",
+    icon: [
+      { url: "/logos/32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/logos/48x48.png", sizes: "48x48", type: "image/png" },
+    ],
+    apple: [
+      { url: "/logos/BL-Connect-logo-appple-touch.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
